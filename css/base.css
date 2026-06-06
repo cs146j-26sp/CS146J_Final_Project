@@ -264,11 +264,13 @@ button {
   min-width: 0;
 }
 
-.settings-menu {
+.settings-menu,
+.account-menu {
   position: relative;
 }
 
 .settings-menu summary,
+.account-menu summary,
 .account-link {
   align-items: center;
   border-radius: 8px;
@@ -288,11 +290,13 @@ button {
   list-style: none;
 }
 
-.settings-menu summary::marker {
+.settings-menu summary::marker,
+.account-menu summary::marker {
   content: "";
 }
 
-.settings-menu summary::-webkit-details-marker {
+.settings-menu summary::-webkit-details-marker,
+.account-menu summary::-webkit-details-marker {
   display: none;
 }
 
@@ -309,6 +313,9 @@ button {
 .settings-menu summary:hover,
 .settings-menu summary:focus-visible,
 .settings-menu[open] summary,
+.account-menu summary:hover,
+.account-menu summary:focus-visible,
+.account-menu[open] summary,
 .account-link:hover,
 .account-link:focus-visible {
   background: var(--subtle);
@@ -336,6 +343,38 @@ button {
   right: 0;
   top: calc(100% + 0.55rem);
   z-index: 20;
+}
+
+.account-menu-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(247, 250, 252, 0.96)),
+    var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  color: var(--muted);
+  display: grid;
+  gap: 0.75rem;
+  min-width: 15rem;
+  padding: 0.85rem;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.55rem);
+  z-index: 20;
+}
+
+:root[data-theme="dark"] .account-menu-panel {
+  background:
+    linear-gradient(180deg, rgba(15, 23, 38, 0.98), rgba(17, 29, 48, 0.96)),
+    var(--paper);
+}
+
+.account-menu-name {
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin: 0;
+  overflow-wrap: anywhere;
 }
 
 :root[data-theme="dark"] .settings-panel {

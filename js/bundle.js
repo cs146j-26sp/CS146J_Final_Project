@@ -51,6 +51,7 @@ function escapeHTML(value) {
 /* js/store.js */
 const STORAGE_KEY = "studyflow-beta-state-v2";
 const AUTH_KEY = "studyflow-active-student";
+const ACCOUNT_KEY = "studyflow-local-accounts";
 
 const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -73,6 +74,34 @@ function setActiveStudent(student) {
       email: student.email.trim().toLowerCase()
     })
   );
+}
+
+function getSavedStudents() {
+  const saved = localStorage.getItem(ACCOUNT_KEY);
+  const students = saved ? parseSavedJSON(saved) : [];
+  return Array.isArray(students) ? students : [];
+}
+
+function findSavedStudent(email) {
+  return getSavedStudents().find((student) => student.email === email.trim().toLowerCase()) || null;
+}
+
+function saveStudentAccount(student) {
+  const nextStudent = {
+    name: student.name.trim(),
+    email: student.email.trim().toLowerCase()
+  };
+  const students = getSavedStudents();
+  const existingIndex = students.findIndex((savedStudent) => savedStudent.email === nextStudent.email);
+
+  if (existingIndex >= 0) {
+    students[existingIndex] = nextStudent;
+  } else {
+    students.push(nextStudent);
+  }
+
+  localStorage.setItem(ACCOUNT_KEY, JSON.stringify(students));
+  return nextStudent;
 }
 
 function clearActiveStudent() {
@@ -220,13 +249,28 @@ function setupNavigation() {
   const toggle = document.querySelector(".nav-toggle");
   const links = document.querySelector(".nav-links");
 
-  if (!toggle || !links) {
-    return;
+  if (toggle && links) {
+    toggle.addEventListener("click", () => {
+      const isOpen = links.classList.toggle("open");
+      toggle.setAttribute("aria-expanded", String(isOpen));
+    });
   }
 
-  toggle.addEventListener("click", () => {
-    const isOpen = links.classList.toggle("open");
-    toggle.setAttribute("aria-expanded", String(isOpen));
+  setupAccountMenu();
+}
+
+function setupAccountMenu() {
+  const student = getActiveStudent();
+
+  document.querySelectorAll("[data-active-student]").forEach((target) => {
+    target.textContent = student ? `${student.name} (${student.email})` : "No active profile";
+  });
+
+  document.querySelectorAll("[data-sign-out]").forEach((button) => {
+    button.addEventListener("click", () => {
+      clearActiveStudent();
+      window.location.href = "../index.html";
+    });
   });
 }
 
@@ -356,11 +400,45 @@ function assistantBubble(role, text) {
 
 /* js/dashboard.js */
 function renderDashboard() {
+  renderDashboardGreeting();
   renderTodayFocus();
   renderDashboardTasks();
   renderMetrics();
   renderRecommendation();
   setupQuickTaskForm();
+}
+
+function renderDashboardGreeting() {
+  const target = document.querySelector("#dashboardGreeting");
+  const student = getActiveStudent();
+
+  if (!target || !student) {
+    return;
+  }
+
+  target.innerHTML = `${getTimeGreeting()}, welcome back <span>${escapeHTML(formatStudentName(student.name))}</span>.`;
+}
+
+function getTimeGreeting() {
+  const hour = new Date().getHours();
+
+  if (hour < 12) {
+    return "Good morning";
+  }
+
+  if (hour < 17) {
+    return "Good afternoon";
+  }
+
+  return "Good evening";
+}
+
+function formatStudentName(name) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 function setupQuickTaskForm() {
@@ -859,75 +937,95 @@ function renderInsights() {
 }
 
 /* js/login.js */
-const DEMO_CREDENTIALS = {
-  name: "Ivy League",
-  email: "demo@stanford.edu",
-  password: "test123"
-};
-
 function setupLoginPage() {
   const form = document.querySelector("#loginForm");
   const status = document.querySelector("#loginStatus");
-  const signedInPanel = document.querySelector("#signedInPanel");
-  const currentStudent = document.querySelector("#currentStudent");
-  const signOut = document.querySelector("#signOutButton");
+  const modeButtons = document.querySelectorAll("[data-auth-mode]");
+  const formTitle = document.querySelector("#login-form-title");
+  const submitButton = document.querySelector("#loginSubmit");
+  const formHint = document.querySelector("#loginHint");
 
-  if (!form || !status || !signedInPanel || !currentStudent || !signOut) {
+  if (!form || !status) {
     return;
   }
 
-  if (!isApprovedActiveStudent()) {
-    clearActiveStudent();
-  }
+  let authMode = "signin";
+  updateAuthMode(authMode);
 
-  renderCurrentStudent();
+  modeButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      authMode = button.dataset.authMode;
+      status.textContent = "";
+      updateAuthMode(authMode);
+    });
+  });
 
   form.addEventListener("submit", (event) => {
     event.preventDefault();
     const data = new FormData(form);
     const name = data.get("name").trim();
     const email = data.get("email").trim().toLowerCase();
-    const password = data.get("password");
 
-    if (!isApprovedDemoLogin(name, email, password)) {
-      status.textContent = "Use the approved demo credentials to sign in.";
+    if (!name || !email) {
+      status.textContent = "Enter your name and email to continue.";
       return;
     }
 
-    setActiveStudent({ name, email });
-    status.textContent = "Signed in. Your StudyFlow data now saves to this student profile.";
+    const savedStudent = findSavedStudent(email);
+
+    if (authMode === "signin") {
+      if (!savedStudent || savedStudent.name.toLowerCase() !== name.toLowerCase()) {
+        status.textContent = "No local account matches those details. Create an account first.";
+        return;
+      }
+
+      setActiveStudent(savedStudent);
+      status.textContent = "Signed in. Your StudyFlow data now saves to this browser profile.";
+    } else {
+      const savedStudents = getSavedStudents();
+      const matchingName = savedStudents.find((student) => student.name.toLowerCase() === name.toLowerCase());
+
+      if (matchingName) {
+        status.textContent = "That user name is already taken.";
+        return;
+      }
+
+      if (savedStudent) {
+        status.textContent = "That email is already linked to an account. Sign in instead.";
+        return;
+      }
+
+      const student = saveStudentAccount({ name, email });
+      setActiveStudent(student);
+      status.textContent = "Account created. Your StudyFlow profile is ready.";
+    }
+
     form.reset();
-    renderCurrentStudent();
     window.location.href = getDashboardPath();
   });
 
-  signOut.addEventListener("click", () => {
-    clearActiveStudent();
-    status.textContent = "Signed out. Sign in again to load a saved student workspace.";
-    renderCurrentStudent();
-  });
-}
+  function updateAuthMode(mode) {
+    modeButtons.forEach((button) => {
+      const isActive = button.dataset.authMode === mode;
+      button.classList.toggle("active", isActive);
+      button.setAttribute("aria-pressed", String(isActive));
+    });
 
-function isApprovedDemoLogin(name, email, password) {
-  return (
-    name === DEMO_CREDENTIALS.name &&
-    email === DEMO_CREDENTIALS.email &&
-    password === DEMO_CREDENTIALS.password
-  );
-}
+    if (formTitle) {
+      formTitle.textContent = mode === "create" ? "Create account" : "Student login";
+    }
 
-function isApprovedActiveStudent() {
-  const student = getActiveStudent();
-  return !student || (student.name === DEMO_CREDENTIALS.name && student.email === DEMO_CREDENTIALS.email);
-}
+    if (submitButton) {
+      submitButton.textContent = mode === "create" ? "Create account" : "Sign in";
+    }
 
-function renderCurrentStudent() {
-  const student = getActiveStudent();
-  const signedInPanel = document.querySelector("#signedInPanel");
-  const currentStudent = document.querySelector("#currentStudent");
-
-  signedInPanel.hidden = !student;
-  currentStudent.textContent = student ? `${student.name} (${student.email})` : "";
+    if (formHint) {
+      formHint.textContent =
+        mode === "create"
+          ? "Create a local StudyFlow profile with just your name and email."
+          : "Use the exact name and email from an account created on this browser.";
+    }
+  }
 }
 
 function getDashboardPath() {
@@ -943,7 +1041,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  if (requiresLogin() && !isApprovedActiveStudentForApp()) {
+  if (requiresLogin() && !getActiveStudent()) {
     clearActiveStudent();
     window.location.href = "../index.html";
     return;
@@ -956,11 +1054,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 function requiresLogin() {
   return document.body.dataset.page !== "login";
-}
-
-function isApprovedActiveStudentForApp() {
-  const student = getActiveStudent();
-  return student?.name === "Ivy League" && student?.email === "demo@stanford.edu";
 }
 
 function routePage() {
