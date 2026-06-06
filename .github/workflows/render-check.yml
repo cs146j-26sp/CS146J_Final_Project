@@ -62,13 +62,22 @@ jobs:
                 errors.push(message.text());
               }
             });
+            
+            await page.addInitScript(() => {
+              localStorage.setItem(
+                'studyflow-active-student',
+                JSON.stringify({ name: 'Ivy League', email: 'demo@stanford.edu' })
+              );
+            });
 
-            await page.goto('http://127.0.0.1:8001/frontend/pages/index.html', {
+            await page.goto('http://127.0.0.1:8001/pages/index.html', {
               waitUntil: 'networkidle'
             });
 
             await page.waitForSelector('.brand');
             await page.waitForSelector('#dashboardTasks .task-card');
+
+
             await page.waitForSelector('.theme-toggle', { state: 'visible' });
 
             const bodyText = await page.locator('body').innerText();
