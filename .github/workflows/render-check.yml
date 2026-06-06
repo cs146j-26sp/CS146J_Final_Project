@@ -63,6 +63,13 @@ jobs:
               }
             });
 
+            await page.addInitScript(() => {
+              localStorage.setItem(
+                'studyflow-active-student',
+                JSON.stringify({ name: 'Ivy League', email: 'demo@stanford.edu' })
+              );
+            });
+
             await page.goto('http://127.0.0.1:8001/pages/index.html', {
               waitUntil: 'networkidle'
             });
