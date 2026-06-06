@@ -1,0 +1,18 @@
+{
+  "name": "studyflow",
+  "version": "1.0.0",
+  "description": "StudyFlow full-stack study planner with a vanilla frontend and Express/SQLite backend.",
+  "main": "backend/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node backend/server.js",
+    "check": "find frontend/js backend -name '*.js' ! -name 'bundle.js' -print -exec node --check {} \\;"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "sqlite3": "^5.1.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.57.0"
+  }
+}

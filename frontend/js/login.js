@@ -1,9 +1,4 @@
-import {
-  findSavedStudent,
-  getSavedStudents,
-  saveStudentAccount,
-  setActiveStudent
-} from "./store.js";
+import { createAccount, loginAccount, setActiveStudent } from "./store.js";
 
 export function setupLoginPage() {
   const form = document.querySelector("#loginForm");
@@ -28,7 +23,7 @@ export function setupLoginPage() {
     });
   });
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const data = new FormData(form);
     const name = data.get("name").trim();
@@ -39,37 +34,22 @@ export function setupLoginPage() {
       return;
     }
 
-    const savedStudent = findSavedStudent(email);
+    submitButton.disabled = true;
+    status.textContent = authMode === "create" ? "Creating your account..." : "Signing you in...";
 
-    if (authMode === "signin") {
-      if (!savedStudent || savedStudent.name.toLowerCase() !== name.toLowerCase()) {
-        status.textContent = "No local account matches those details. Create an account first.";
-        return;
-      }
-
-      setActiveStudent(savedStudent);
-      status.textContent = "Signed in. Your StudyFlow data now saves to this browser profile.";
-    } else {
-      const savedStudents = getSavedStudents();
-      const matchingName = savedStudents.find((student) => student.name.toLowerCase() === name.toLowerCase());
-
-      if (matchingName) {
-        status.textContent = "That user name is already taken.";
-        return;
-      }
-
-      if (savedStudent) {
-        status.textContent = "That email is already linked to an account. Sign in instead.";
-        return;
-      }
-
-      const student = saveStudentAccount({ name, email });
+    try {
+      const student =
+        authMode === "create" ? await createAccount({ name, email }) : await loginAccount({ name, email });
       setActiveStudent(student);
-      status.textContent = "Account created. Your StudyFlow profile is ready.";
+      status.textContent =
+        authMode === "create" ? "Account created. Your StudyFlow profile is ready." : "Signed in.";
+      form.reset();
+      window.location.href = getDashboardPath();
+    } catch (error) {
+      status.textContent = error.message;
+    } finally {
+      submitButton.disabled = false;
     }
-
-    form.reset();
-    window.location.href = getDashboardPath();
   });
 
   function updateAuthMode(mode) {
@@ -90,8 +70,8 @@ export function setupLoginPage() {
     if (formHint) {
       formHint.textContent =
         mode === "create"
-          ? "Create a local StudyFlow profile with just your name and email."
-          : "Use the exact name and email from an account created on this browser.";
+          ? "Create a StudyFlow profile with just your name and email."
+          : "Use the exact name and email from your StudyFlow account.";
     }
   }
 }

@@ -1,8 +1,5 @@
-import { nextId } from "./utils.js";
-
-const STORAGE_KEY = "studyflow-beta-state-v2";
 const AUTH_KEY = "studyflow-active-student";
-const ACCOUNT_KEY = "studyflow-local-accounts";
+const API_BASE = "/api";
 
 export const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -21,87 +18,126 @@ export function setActiveStudent(student) {
   localStorage.setItem(
     AUTH_KEY,
     JSON.stringify({
+      id: student.id,
       name: student.name.trim(),
       email: student.email.trim().toLowerCase()
     })
   );
 }
 
-export function getSavedStudents() {
-  const saved = localStorage.getItem(ACCOUNT_KEY);
-  const students = saved ? parseSavedJSON(saved) : [];
-  return Array.isArray(students) ? students : [];
-}
-
-export function findSavedStudent(email) {
-  return getSavedStudents().find((student) => student.email === email.trim().toLowerCase()) || null;
-}
-
-export function saveStudentAccount(student) {
-  const nextStudent = {
-    name: student.name.trim(),
-    email: student.email.trim().toLowerCase()
-  };
-  const students = getSavedStudents();
-  const existingIndex = students.findIndex((savedStudent) => savedStudent.email === nextStudent.email);
-
-  if (existingIndex >= 0) {
-    students[existingIndex] = nextStudent;
-  } else {
-    students.push(nextStudent);
-  }
-
-  localStorage.setItem(ACCOUNT_KEY, JSON.stringify(students));
-  return nextStudent;
-}
-
 export function clearActiveStudent() {
   localStorage.removeItem(AUTH_KEY);
 }
 
+export async function createAccount(student) {
+  return apiRequest("/users", {
+    method: "POST",
+    body: student
+  });
+}
+
+export async function loginAccount(student) {
+  return apiRequest("/login", {
+    method: "POST",
+    body: student
+  });
+}
+
 export async function loadState() {
-  const saved = localStorage.getItem(getStorageKey());
-  const savedData = saved ? parseSavedJSON(saved) : null;
-  const data = savedData?.tasks?.length ? savedData : await fetchMockData();
+  const student = getActiveStudent();
 
-  Object.assign(state, data);
-
-  if (!savedData?.tasks?.length) {
-    saveState();
+  if (!student?.id) {
+    throw new Error("No active StudyFlow user.");
   }
+
+  const [tasks, sessions, analytics] = await Promise.all([
+    apiRequest(`/users/${student.id}/tasks`),
+    apiRequest(`/users/${student.id}/sessions`),
+    apiRequest(`/users/${student.id}/analytics`)
+  ]);
+
+  Object.assign(state, {
+    tasks,
+    sessions,
+    focusMinutes: analytics.focusMinutes
+  });
 }
 
 export function saveState() {
-  localStorage.setItem(getStorageKey(), JSON.stringify(state));
+  return Promise.resolve();
 }
 
-export function addTask(task) {
-  state.tasks.push({
-    id: nextId(state.tasks),
-    ...task
+export async function addTask(task) {
+  const student = getActiveStudent();
+
+  if (!student?.id) {
+    throw new Error("Sign in before adding tasks.");
+  }
+
+  const created = await apiRequest(`/users/${student.id}/tasks`, {
+    method: "POST",
+    body: task
   });
-  saveState();
+
+  state.tasks.push(created);
+  return created;
 }
 
-export function toggleTask(id) {
-  state.tasks = state.tasks.map((task) =>
-    task.id === id
-      ? {
-          ...task,
-          status: task.status === "completed" ? "open" : "completed"
-        }
-      : task
-  );
-  saveState();
+export async function toggleTask(id) {
+  const task = state.tasks.find((item) => item.id === id);
+  const updated = await apiRequest(`/tasks/${id}`, {
+    method: "PATCH",
+    body: {
+      status: task?.status === "completed" ? "open" : "completed"
+    }
+  });
+
+  state.tasks = state.tasks.map((item) => (item.id === id ? updated : item));
+  return updated;
+}
+
+export async function deleteTask(id) {
+  await apiRequest(`/tasks/${id}`, {
+    method: "DELETE"
+  });
+
+  state.tasks = state.tasks.filter((task) => task.id !== id);
+}
+
+export async function addSession(session) {
+  const student = getActiveStudent();
+
+  if (!student?.id) {
+    throw new Error("Sign in before adding study sessions.");
+  }
+
+  const created = await apiRequest(`/users/${student.id}/sessions`, {
+    method: "POST",
+    body: session
+  });
+
+  state.sessions.push(created);
+  return created;
+}
+
+export async function replaceSessions(sessions) {
+  const student = getActiveStudent();
+
+  if (!student?.id) {
+    throw new Error("Sign in before updating the planner.");
+  }
+
+  const saved = await apiRequest(`/users/${student.id}/sessions`, {
+    method: "PUT",
+    body: { sessions }
+  });
+
+  state.sessions = saved;
+  return saved;
 }
 
 export function sortedTasks() {
   return [...state.tasks].sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
-}
-
-function getStorageKey() {
-  const student = getActiveStudent();
-  return student ? `${STORAGE_KEY}:${student.email}` : STORAGE_KEY;
 }
 
 function parseSavedJSON(value) {
@@ -113,84 +149,26 @@ function parseSavedJSON(value) {
   }
 }
 
-async function fetchMockData() {
-  try {
-    const response = await fetch("../data/mock-data.json");
-    if (response.ok) {
-      return response.json();
-    }
-  } catch (error) {
-    console.warn("Using built-in mock data fallback.", error);
+async function apiRequest(path, options = {}) {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: options.method || "GET",
+    headers: options.body
+      ? {
+          "Content-Type": "application/json"
+        }
+      : undefined,
+    body: options.body ? JSON.stringify(options.body) : undefined
+  });
+
+  if (response.status === 204) {
+    return null;
   }
 
-  return {
-    tasks: [
-      {
-        id: 1,
-        title: "Sprint 1 beta prototype",
-        course: "CS 146J",
-        type: "Project",
-        dueDate: "2026-05-26",
-        priority: "High",
-        hours: 5,
-        status: "open"
-      },
-      {
-        id: 2,
-        title: "Linear algebra problem set",
-        course: "MATH 51",
-        type: "Assignment",
-        dueDate: "2026-05-28",
-        priority: "Medium",
-        hours: 3,
-        status: "open"
-      },
-      {
-        id: 3,
-        title: "Biology midterm review",
-        course: "BIO 82",
-        type: "Exam",
-        dueDate: "2026-05-29",
-        priority: "High",
-        hours: 4,
-        status: "open"
-      },
-      {
-        id: 4,
-        title: "Reading response draft",
-        course: "PWR 2",
-        type: "Reading",
-        dueDate: "2026-05-30",
-        priority: "Low",
-        hours: 1.5,
-        status: "completed"
-      },
-      {
-        id: 5,
-        title: "Chemistry lab reflection",
-        course: "CHEM 31",
-        type: "Assignment",
-        dueDate: "2026-06-01",
-        priority: "Medium",
-        hours: 2,
-        status: "open"
-      }
-    ],
-    sessions: [
-      { id: 1, day: "Monday", time: "09:00", subject: "CS 146J", duration: 75 },
-      { id: 2, day: "Tuesday", time: "13:00", subject: "BIO 82", duration: 50 },
-      { id: 3, day: "Wednesday", time: "10:30", subject: "MATH 51", duration: 50 },
-      { id: 4, day: "Thursday", time: "15:00", subject: "BIO 82", duration: 75 },
-      { id: 5, day: "Friday", time: "11:00", subject: "CHEM 31", duration: 25 }
-    ],
-    focusMinutes: [
-      { day: "Mon", minutes: 80 },
-      { day: "Tue", minutes: 110 },
-      { day: "Wed", minutes: 45 },
-      { day: "Thu", minutes: 95 },
-      { day: "Fri", minutes: 50 },
-      { day: "Sat", minutes: 30 },
-      { day: "Sun", minutes: 65 }
-    ]
-  };
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "StudyFlow API request failed.");
+  }
+
+  return data;
 }
