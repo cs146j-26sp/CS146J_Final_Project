@@ -1,6 +1,7 @@
 import { nextId } from "./utils.js";
 
 const STORAGE_KEY = "studyflow-beta-state-v2";
+const AUTH_KEY = "studyflow-active-student";
 
 export const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -10,9 +11,28 @@ export const state = {
   focusMinutes: []
 };
 
+export function getActiveStudent() {
+  const saved = localStorage.getItem(AUTH_KEY);
+  return saved ? parseSavedJSON(saved) : null;
+}
+
+export function setActiveStudent(student) {
+  localStorage.setItem(
+    AUTH_KEY,
+    JSON.stringify({
+      name: student.name.trim(),
+      email: student.email.trim().toLowerCase()
+    })
+  );
+}
+
+export function clearActiveStudent() {
+  localStorage.removeItem(AUTH_KEY);
+}
+
 export async function loadState() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  const savedData = saved ? JSON.parse(saved) : null;
+  const saved = localStorage.getItem(getStorageKey());
+  const savedData = saved ? parseSavedJSON(saved) : null;
   const data = savedData?.tasks?.length ? savedData : await fetchMockData();
 
   Object.assign(state, data);
@@ -23,7 +43,7 @@ export async function loadState() {
 }
 
 export function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(getStorageKey(), JSON.stringify(state));
 }
 
 export function addTask(task) {
@@ -48,6 +68,20 @@ export function toggleTask(id) {
 
 export function sortedTasks() {
   return [...state.tasks].sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+}
+
+function getStorageKey() {
+  const student = getActiveStudent();
+  return student ? `${STORAGE_KEY}:${student.email}` : STORAGE_KEY;
+}
+
+function parseSavedJSON(value) {
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    console.warn("Ignoring invalid saved StudyFlow data.", error);
+    return null;
+  }
 }
 
 async function fetchMockData() {

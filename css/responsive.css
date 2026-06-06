@@ -1,6 +1,6 @@
 @media (min-width: 1181px) {
   .page-shell {
-    max-width: 1240px;
+    max-width: none;
   }
 
   .hero-grid {
@@ -31,7 +31,8 @@
   .dashboard-layout,
   .tool-layout,
   .planner-grid,
-  .analytics-grid {
+  .analytics-grid,
+  .login-layout {
     grid-template-columns: 1fr;
   }
 
@@ -49,6 +50,10 @@
 
   .hero-copy {
     min-height: 360px;
+  }
+
+  .login-hero {
+    min-height: 280px;
   }
 
   .today-panel {
@@ -96,6 +101,20 @@
     place-items: center;
   }
 
+  .nav-shell {
+    gap: 0.45rem;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    padding-inline: 0.45rem;
+  }
+
+  .brand {
+    min-width: 0;
+  }
+
+  .nav-utilities {
+    grid-column: 3;
+  }
+
   .nav-links {
     background: rgba(255, 255, 255, 0.96);
     border-bottom: 1px solid var(--line);
@@ -129,12 +148,14 @@
   }
 
   .page-intro h1,
-  .hero-copy h1 {
+  .hero-copy h1,
+  .login-hero h1 {
     font-size: clamp(2.1rem, 11vw, 3.2rem);
     line-height: 1;
   }
 
   .hero-copy,
+  .login-hero,
   .today-panel,
   .panel {
     padding: 1rem;
@@ -224,7 +245,7 @@
 
 @media (max-width: 420px) {
   .nav-shell {
-    padding-inline: 0.85rem;
+    padding-inline: 0.35rem;
   }
 
   .brand {

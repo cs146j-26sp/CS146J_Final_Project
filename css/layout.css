@@ -210,3 +210,52 @@
 .page-intro h1 {
   max-width: 920px;
 }
+
+.login-shell {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.login-hero {
+  align-items: end;
+  background:
+    linear-gradient(135deg, rgba(20, 33, 61, 0.94), rgba(0, 127, 125, 0.82) 58%, rgba(66, 103, 213, 0.72)),
+    url("https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80");
+  background-position: center;
+  background-size: cover;
+  border-radius: 8px;
+  box-shadow: var(--shadow-lg);
+  color: white;
+  display: grid;
+  min-height: 310px;
+  padding: clamp(1.4rem, 4vw, 3rem);
+}
+
+.login-hero h1 {
+  font-size: clamp(2.25rem, 6vw, 4.5rem);
+  letter-spacing: 0;
+  line-height: 0.98;
+  margin: 0;
+  max-width: 760px;
+}
+
+.login-hero p:not(.eyebrow) {
+  color: rgba(255, 255, 255, 0.86);
+  font-size: 1.05rem;
+  max-width: 650px;
+}
+
+.login-hero .eyebrow {
+  color: #9ff2e8;
+}
+
+.login-layout {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: minmax(0, 0.75fr) minmax(280px, 0.25fr);
+}
+
+.login-panel,
+.account-panel {
+  align-self: start;
+}
