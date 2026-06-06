@@ -19,8 +19,8 @@ jobs:
 
       - name: Check JavaScript syntax
         run: |
-          if ls js/*.js >/dev/null 2>&1; then
-            for file in js/*.js; do
+          if ls frontend/js/*.js >/dev/null 2>&1; then
+            for file in frontend/js/*.js; do
               node --check "$file"
             done
           fi
@@ -63,16 +63,13 @@ jobs:
               }
             });
 
-            await page.addInitScript(() => {
-              localStorage.setItem(
-                'studyflow-active-student',
-                JSON.stringify({ name: 'Ivy League', email: 'demo@stanford.edu' })
-              );
-            });
-
-            await page.goto('http://127.0.0.1:8001/pages/index.html', {
+            const response = await page.goto('http://127.0.0.1:8001/frontend/pages/index.html', {
               waitUntil: 'networkidle'
             });
+
+            if (!response || !response.ok()) {
+              throw new Error(`Dashboard page did not load. URL: ${page.url()} Status: ${response?.status()}`);
+            }
 
             await page.waitForSelector('.brand');
             await page.waitForSelector('#dashboardTasks .task-card');
