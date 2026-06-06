@@ -50,6 +50,7 @@ function escapeHTML(value) {
 
 /* js/store.js */
 const STORAGE_KEY = "studyflow-beta-state-v2";
+const AUTH_KEY = "studyflow-active-student";
 
 const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -59,9 +60,28 @@ const state = {
   focusMinutes: []
 };
 
+function getActiveStudent() {
+  const saved = localStorage.getItem(AUTH_KEY);
+  return saved ? parseSavedJSON(saved) : null;
+}
+
+function setActiveStudent(student) {
+  localStorage.setItem(
+    AUTH_KEY,
+    JSON.stringify({
+      name: student.name.trim(),
+      email: student.email.trim().toLowerCase()
+    })
+  );
+}
+
+function clearActiveStudent() {
+  localStorage.removeItem(AUTH_KEY);
+}
+
 async function loadState() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  const savedData = saved ? JSON.parse(saved) : null;
+  const saved = localStorage.getItem(getStorageKey());
+  const savedData = saved ? parseSavedJSON(saved) : null;
   const data = savedData?.tasks?.length ? savedData : await fetchMockData();
 
   Object.assign(state, data);
@@ -72,7 +92,7 @@ async function loadState() {
 }
 
 function saveState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(getStorageKey(), JSON.stringify(state));
 }
 
 function addTask(task) {
@@ -97,6 +117,20 @@ function toggleTask(id) {
 
 function sortedTasks() {
   return [...state.tasks].sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
+}
+
+function getStorageKey() {
+  const student = getActiveStudent();
+  return student ? `${STORAGE_KEY}:${student.email}` : STORAGE_KEY;
+}
+
+function parseSavedJSON(value) {
+  try {
+    return JSON.parse(value);
+  } catch (error) {
+    console.warn("Ignoring invalid saved StudyFlow data.", error);
+    return null;
+  }
 }
 
 async function fetchMockData() {
@@ -824,13 +858,110 @@ function renderInsights() {
   `;
 }
 
+/* js/login.js */
+const DEMO_CREDENTIALS = {
+  name: "Ivy League",
+  email: "demo@stanford.edu",
+  password: "test123"
+};
+
+function setupLoginPage() {
+  const form = document.querySelector("#loginForm");
+  const status = document.querySelector("#loginStatus");
+  const signedInPanel = document.querySelector("#signedInPanel");
+  const currentStudent = document.querySelector("#currentStudent");
+  const signOut = document.querySelector("#signOutButton");
+
+  if (!form || !status || !signedInPanel || !currentStudent || !signOut) {
+    return;
+  }
+
+  if (!isApprovedActiveStudent()) {
+    clearActiveStudent();
+  }
+
+  renderCurrentStudent();
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const data = new FormData(form);
+    const name = data.get("name").trim();
+    const email = data.get("email").trim().toLowerCase();
+    const password = data.get("password");
+
+    if (!isApprovedDemoLogin(name, email, password)) {
+      status.textContent = "Use the approved demo credentials to sign in.";
+      return;
+    }
+
+    setActiveStudent({ name, email });
+    status.textContent = "Signed in. Your StudyFlow data now saves to this student profile.";
+    form.reset();
+    renderCurrentStudent();
+    window.location.href = getDashboardPath();
+  });
+
+  signOut.addEventListener("click", () => {
+    clearActiveStudent();
+    status.textContent = "Signed out. Sign in again to load a saved student workspace.";
+    renderCurrentStudent();
+  });
+}
+
+function isApprovedDemoLogin(name, email, password) {
+  return (
+    name === DEMO_CREDENTIALS.name &&
+    email === DEMO_CREDENTIALS.email &&
+    password === DEMO_CREDENTIALS.password
+  );
+}
+
+function isApprovedActiveStudent() {
+  const student = getActiveStudent();
+  return !student || (student.name === DEMO_CREDENTIALS.name && student.email === DEMO_CREDENTIALS.email);
+}
+
+function renderCurrentStudent() {
+  const student = getActiveStudent();
+  const signedInPanel = document.querySelector("#signedInPanel");
+  const currentStudent = document.querySelector("#currentStudent");
+
+  signedInPanel.hidden = !student;
+  currentStudent.textContent = student ? `${student.name} (${student.email})` : "";
+}
+
+function getDashboardPath() {
+  return window.location.pathname.endsWith("/pages/login.html") ? "index.html" : "pages/index.html";
+}
+
 /* js/app.js */
 document.addEventListener("DOMContentLoaded", async () => {
   setupNavigation();
+
+  if (document.body.dataset.page === "login") {
+    setupLoginPage();
+    return;
+  }
+
+  if (requiresLogin() && !isApprovedActiveStudentForApp()) {
+    clearActiveStudent();
+    window.location.href = "../index.html";
+    return;
+  }
+
   await loadState();
   setupAssistant();
   routePage();
 });
+
+function requiresLogin() {
+  return document.body.dataset.page !== "login";
+}
+
+function isApprovedActiveStudentForApp() {
+  const student = getActiveStudent();
+  return student?.name === "Ivy League" && student?.email === "demo@stanford.edu";
+}
 
 function routePage() {
   const page = document.body.dataset.page;
@@ -850,5 +981,8 @@ function routePage() {
   if (page === "analytics") {
     renderAnalytics();
   }
-}
 
+  if (page === "login") {
+    setupLoginPage();
+  }
+}

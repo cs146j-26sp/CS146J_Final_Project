@@ -4,9 +4,10 @@ StudyFlow is a smart study planner for organizing academic tasks, generating stu
 
 ## Sprint 1 scope
 
-- Multi-page frontend: dashboard, tasks, planner, and analytics.
+- Multi-page frontend: dashboard, tasks, planner, analytics, and student login.
 - Mock data loaded with `fetch()` from `data/mock-data.json`.
-- Task creation, completion toggles, deletion, filtering, and local persistence with `localStorage`.
+- Student-specific task/session persistence with `localStorage` until backend auth is connected.
+- Task creation, completion toggles, deletion, filtering, and local persistence.
 - Generated weekly study plan plus manual study session creation.
 - Productivity analytics built with plain HTML, CSS, and JavaScript.
 - Responsive layouts, keyboard navigation support, visible focus states, semantic sections, labels, and ARIA attributes.
@@ -22,7 +23,7 @@ python3 -m http.server 8001
 Then open:
 
 ```text
-http://127.0.0.1:8001/pages/index.html
+http://127.0.0.1:8001/
 ```
 
 Use a local server instead of opening the HTML file directly because the app fetches mock JSON.
@@ -36,11 +37,12 @@ Use a local server instead of opening the HTML file directly because the app fet
 
 ## Demo path
 
-1. Start on the dashboard and explain the core vision: one place for deadlines, study planning, and progress.
-2. Add a quick task and show the priority queue and metrics updating.
-3. Open Tasks, filter open/completed tasks, complete a task, and delete a test task.
-4. Open Planner, regenerate the schedule, and add a manual study session.
-5. Open Analytics and explain the focus chart, completion donut, course workload, and risk insight.
+1. Start on Login and sign in with `Ivy League`, `demo@stanford.edu`, and `test123`.
+2. Open the dashboard and explain the core vision: one place for deadlines, study planning, and progress.
+3. Add a quick task and show the priority queue and metrics updating.
+4. Open Tasks, filter open/completed tasks, complete a task, and delete a test task.
+5. Open Planner, regenerate the schedule, and add a manual study session.
+6. Open Analytics and explain the focus chart, completion donut, course workload, and risk insight.
 
 ## Sprint 2 plan
 
