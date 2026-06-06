@@ -1,12 +1,46 @@
-import { addTask, sortedTasks, state, toggleTask } from "./store.js";
+import { addTask, getActiveStudent, sortedTasks, state, toggleTask } from "./store.js";
 import { escapeHTML, formatDate, priorityTag } from "./utils.js";
 
 export function renderDashboard() {
+  renderDashboardGreeting();
   renderTodayFocus();
   renderDashboardTasks();
   renderMetrics();
   renderRecommendation();
   setupQuickTaskForm();
+}
+
+function renderDashboardGreeting() {
+  const target = document.querySelector("#dashboardGreeting");
+  const student = getActiveStudent();
+
+  if (!target || !student) {
+    return;
+  }
+
+  target.innerHTML = `${getTimeGreeting()}, welcome back <span>${escapeHTML(formatStudentName(student.name))}</span>.`;
+}
+
+function getTimeGreeting() {
+  const hour = new Date().getHours();
+
+  if (hour < 12) {
+    return "Good morning";
+  }
+
+  if (hour < 17) {
+    return "Good afternoon";
+  }
+
+  return "Good evening";
+}
+
+function formatStudentName(name) {
+  return name
+    .trim()
+    .split(/\s+/)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
 }
 
 function setupQuickTaskForm() {

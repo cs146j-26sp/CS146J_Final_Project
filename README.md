@@ -5,7 +5,7 @@ StudyFlow is a smart study planner for organizing academic tasks, generating stu
 ## Sprint 1 scope
 
 - Multi-page frontend: dashboard, tasks, planner, analytics, and student login.
-- Mock data loaded with `fetch()` from `data/mock-data.json`.
+- Mock data loaded with `fetch()` from `frontend/data/mock-data.json`.
 - Student-specific task/session persistence with `localStorage` until backend auth is connected.
 - Task creation, completion toggles, deletion, filtering, and local persistence.
 - Generated weekly study plan plus manual study session creation.
@@ -23,21 +23,21 @@ python3 -m http.server 8001
 Then open:
 
 ```text
-http://127.0.0.1:8001/
+http://127.0.0.1:8001/frontend/
 ```
 
 Use a local server instead of opening the HTML file directly because the app fetches mock JSON.
 
 ## Project structure
 
-- `pages/` contains all HTML pages.
-- `css/` contains the CSS entrypoint and split style modules.
-- `js/` contains the JavaScript entrypoint and split behavior modules.
-- `data/` contains Sprint 1 mock JSON.
+- `frontend/pages/` contains all app HTML pages.
+- `frontend/css/` contains the CSS entrypoint and split style modules.
+- `frontend/js/` contains the JavaScript entrypoint and split behavior modules.
+- `frontend/data/` contains Sprint 1 mock JSON.
 
 ## Demo path
 
-1. Start on Login and sign in with `Ivy League`, `demo@stanford.edu`, and `test123`.
+1. Start on Login, create a local account with your name and email, then sign in.
 2. Open the dashboard and explain the core vision: one place for deadlines, study planning, and progress.
 3. Add a quick task and show the priority queue and metrics updating.
 4. Open Tasks, filter open/completed tasks, complete a task, and delete a test task.

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>StudyFlow | Login</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css?v=account-menu-1" />
+    <script src="js/theme-toggle.js" defer></script>
+    <script src="js/bundle.js?v=account-menu-2" defer></script>
+  </head>
+  <body data-page="login">
+    <a class="skip-link" href="#main">Skip to main content</a>
+    <header class="site-header">
+      <nav class="nav-shell" aria-label="StudyFlow">
+        <a class="brand" href="index.html" aria-label="StudyFlow login">
+          <span class="brand-mark" aria-hidden="true">SF</span>
+          <span>StudyFlow</span>
+        </a>
+        <div class="nav-utilities login-utilities">
+          <button class="theme-toggle" type="button" aria-label="Switch to dark mode" aria-pressed="false">
+            <span aria-hidden="true">☾</span>
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <main id="main" class="page-shell login-shell">
+      <section class="panel login-card" aria-labelledby="login-title">
+        <div class="login-welcome">
+          <p class="eyebrow">Student workspace</p>
+          <h1 id="login-title" class="animated-login-title">
+            <span class="title-word">Welcome</span>
+            <span class="title-word">to</span>
+            <span class="title-brand">StudyFlow</span>
+          </h1>
+          <p>
+            Sign in to your local study space or create a simple account with your name and email.
+          </p>
+        </div>
+
+        <div class="login-panel" aria-labelledby="login-form-title">
+          <div class="section-heading">
+            <h2 id="login-form-title">Student login</h2>
+          </div>
+          <div class="auth-mode-toggle" aria-label="Account mode">
+            <button class="active" type="button" data-auth-mode="signin" aria-pressed="true">Sign in</button>
+            <button type="button" data-auth-mode="create" aria-pressed="false">Create account</button>
+          </div>
+          <form class="stacked-form" id="loginForm" action="pages/index.html" method="get">
+            <label>
+              <span>Name</span>
+              <input required name="name" type="text" autocomplete="name" placeholder="Your name" />
+            </label>
+            <label>
+              <span>School email</span>
+              <input required name="email" type="email" autocomplete="email" placeholder="you@school.edu" />
+            </label>
+            <p class="form-hint" id="loginHint">Use the exact name and email from an account created on this browser.</p>
+            <p class="form-error" id="loginStatus" aria-live="assertive"></p>
+            <button class="button primary" id="loginSubmit" type="submit">Sign in</button>
+          </form>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

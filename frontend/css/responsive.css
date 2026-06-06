@@ -31,8 +31,7 @@
   .dashboard-layout,
   .tool-layout,
   .planner-grid,
-  .analytics-grid,
-  .login-layout {
+  .analytics-grid {
     grid-template-columns: 1fr;
   }
 
@@ -50,10 +49,6 @@
 
   .hero-copy {
     min-height: 360px;
-  }
-
-  .login-hero {
-    min-height: 280px;
   }
 
   .today-panel {
@@ -148,17 +143,23 @@
   }
 
   .page-intro h1,
-  .hero-copy h1,
-  .login-hero h1 {
+  .hero-copy h1 {
     font-size: clamp(2.1rem, 11vw, 3.2rem);
     line-height: 1;
   }
 
   .hero-copy,
-  .login-hero,
   .today-panel,
   .panel {
     padding: 1rem;
+  }
+
+  .login-card {
+    padding: 1.25rem;
+  }
+
+  .animated-login-title {
+    font-size: 2.35rem;
   }
 
   .hero-copy {

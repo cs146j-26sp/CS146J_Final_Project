@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  if (requiresLogin() && !isApprovedActiveStudent()) {
+  if (requiresLogin() && !getActiveStudent()) {
     clearActiveStudent();
     window.location.href = "../index.html";
     return;
@@ -29,11 +29,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 function requiresLogin() {
   return document.body.dataset.page !== "login";
 }
-function isApprovedActiveStudent() {
-  const student = getActiveStudent();
-  return student?.name === "Ivy League" && student?.email === "demo@stanford.edu";
-}
-
 function routePage() {
   const page = document.body.dataset.page;
 

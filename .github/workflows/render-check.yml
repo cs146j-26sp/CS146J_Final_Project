@@ -10,17 +10,17 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
 
       - name: Check JavaScript syntax
         run: |
-          if ls js/*.js >/dev/null 2>&1; then
-            for file in js/*.js; do
+          if ls frontend/js/*.js >/dev/null 2>&1; then
+            for file in frontend/js/*.js; do
               node --check "$file"
             done
           fi
@@ -46,6 +46,16 @@ jobs:
             const page = await browser.newPage();
             const errors = [];
 
+            await page.addInitScript(() => {
+              const student = {
+                name: 'Render Check',
+                email: 'render-check@studyflow.test'
+              };
+
+              localStorage.setItem('studyflow-active-student', JSON.stringify(student));
+              localStorage.setItem('studyflow-local-accounts', JSON.stringify([student]));
+            });
+
             page.on('pageerror', (error) => errors.push(error.message));
             page.on('console', (message) => {
               if (message.type() === 'error') {
@@ -53,20 +63,16 @@ jobs:
               }
             });
 
-            await page.addInitScript(() => {
-              localStorage.setItem(
-                'studyflow-active-student',
-                JSON.stringify({ name: 'Ivy League', email: 'demo@stanford.edu' })
-              );
-            });
-
-            await page.goto('http://127.0.0.1:8001/pages/index.html', {
+            const response = await page.goto('http://127.0.0.1:8001/frontend/pages/index.html', {
               waitUntil: 'networkidle'
             });
 
+            if (!response || !response.ok()) {
+              throw new Error(`Dashboard page did not load. URL: ${page.url()} Status: ${response?.status()}`);
+            }
+
             await page.waitForSelector('.brand');
             await page.waitForSelector('#dashboardTasks .task-card');
-            await page.click('.settings-menu summary');
             await page.waitForSelector('.theme-toggle', { state: 'visible' });
 
             const bodyText = await page.locator('body').innerText();
@@ -74,7 +80,7 @@ jobs:
               throw new Error('StudyFlow text did not render.');
             }
 
-            await page.click('.theme-toggle');
+            await page.locator('.theme-toggle').first().click();
             const theme = await page.evaluate(() => document.documentElement.dataset.theme);
             if (theme !== 'dark' && theme !== 'light') {
               throw new Error('Theme toggle did not update the page theme.');

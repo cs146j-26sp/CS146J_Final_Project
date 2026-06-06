@@ -2,6 +2,7 @@ import { nextId } from "./utils.js";
 
 const STORAGE_KEY = "studyflow-beta-state-v2";
 const AUTH_KEY = "studyflow-active-student";
+const ACCOUNT_KEY = "studyflow-local-accounts";
 
 export const dayOrder = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
 
@@ -24,6 +25,34 @@ export function setActiveStudent(student) {
       email: student.email.trim().toLowerCase()
     })
   );
+}
+
+export function getSavedStudents() {
+  const saved = localStorage.getItem(ACCOUNT_KEY);
+  const students = saved ? parseSavedJSON(saved) : [];
+  return Array.isArray(students) ? students : [];
+}
+
+export function findSavedStudent(email) {
+  return getSavedStudents().find((student) => student.email === email.trim().toLowerCase()) || null;
+}
+
+export function saveStudentAccount(student) {
+  const nextStudent = {
+    name: student.name.trim(),
+    email: student.email.trim().toLowerCase()
+  };
+  const students = getSavedStudents();
+  const existingIndex = students.findIndex((savedStudent) => savedStudent.email === nextStudent.email);
+
+  if (existingIndex >= 0) {
+    students[existingIndex] = nextStudent;
+  } else {
+    students.push(nextStudent);
+  }
+
+  localStorage.setItem(ACCOUNT_KEY, JSON.stringify(students));
+  return nextStudent;
 }
 
 export function clearActiveStudent() {

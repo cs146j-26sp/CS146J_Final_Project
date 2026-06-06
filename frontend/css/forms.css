@@ -47,6 +47,44 @@ select:hover {
   gap: 0.85rem;
 }
 
+.auth-mode-toggle {
+  background: var(--subtle);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 0.35rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 1rem;
+  padding: 0.35rem;
+}
+
+.auth-mode-toggle button {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  min-height: 2.35rem;
+  padding: 0.55rem 0.7rem;
+  transition: background 160ms ease, box-shadow 160ms ease, color 160ms ease;
+}
+
+.auth-mode-toggle button.active,
+.auth-mode-toggle button:focus-visible {
+  background: white;
+  box-shadow: 0 8px 20px rgba(20, 33, 61, 0.12);
+  color: var(--ink);
+  outline: none;
+}
+
+:root[data-theme="dark"] .auth-mode-toggle button.active,
+:root[data-theme="dark"] .auth-mode-toggle button:focus-visible {
+  background: rgba(255, 255, 255, 0.08);
+}
+
 fieldset {
   border: 0;
   margin: 0;
