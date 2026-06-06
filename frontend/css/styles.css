@@ -163,7 +163,7 @@ button {
   border-radius: 8px;
   bottom: 1rem;
   color: white;
-  content: "Run with python3 -m http.server 8001, then open /pages/index.html";
+  content: "Run with python3 -m http.server 8001, then open /frontend/pages/index.html";
   font-weight: 800;
   left: 1rem;
   max-width: min(28rem, calc(100vw - 2rem));

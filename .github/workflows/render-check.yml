@@ -19,8 +19,8 @@ jobs:
 
       - name: Check JavaScript syntax
         run: |
-          if ls js/*.js >/dev/null 2>&1; then
-            for file in js/*.js; do
+          if ls frontend/js/*.js >/dev/null 2>&1; then
+            for file in frontend/js/*.js; do
               node --check "$file"
             done
           fi
@@ -63,7 +63,7 @@ jobs:
               }
             });
 
-            await page.goto('http://127.0.0.1:8001/pages/index.html', {
+            await page.goto('http://127.0.0.1:8001/frontend/pages/index.html', {
               waitUntil: 'networkidle'
             });
 
