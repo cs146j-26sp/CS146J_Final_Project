@@ -10,10 +10,10 @@ jobs:
 
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: 22
 
@@ -46,6 +46,16 @@ jobs:
             const page = await browser.newPage();
             const errors = [];
 
+            await page.addInitScript(() => {
+              const student = {
+                name: 'Render Check',
+                email: 'render-check@studyflow.test'
+              };
+
+              localStorage.setItem('studyflow-active-student', JSON.stringify(student));
+              localStorage.setItem('studyflow-local-accounts', JSON.stringify([student]));
+            });
+
             page.on('pageerror', (error) => errors.push(error.message));
             page.on('console', (message) => {
               if (message.type() === 'error') {
@@ -59,14 +69,14 @@ jobs:
 
             await page.waitForSelector('.brand');
             await page.waitForSelector('#dashboardTasks .task-card');
-            await page.waitForSelector('.theme-toggle');
+            await page.waitForSelector('.theme-toggle', { state: 'visible' });
 
             const bodyText = await page.locator('body').innerText();
             if (!bodyText.includes('StudyFlow')) {
               throw new Error('StudyFlow text did not render.');
             }
 
-            await page.click('.theme-toggle');
+            await page.locator('.theme-toggle').first().click();
             const theme = await page.evaluate(() => document.documentElement.dataset.theme);
             if (theme !== 'dark' && theme !== 'light') {
               throw new Error('Theme toggle did not update the page theme.');
