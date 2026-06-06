@@ -18,22 +18,16 @@ jobs:
           node-version: 22
 
       - name: Check JavaScript syntax
-        run: |
-          if ls frontend/js/*.js >/dev/null 2>&1; then
-            for file in frontend/js/*.js; do
-              node --check "$file"
-            done
-          fi
+        run: npm run check
 
-      - name: Install Playwright
+      - name: Install dependencies
         run: |
-          npm init -y
-          npm install -D @playwright/test
+          npm ci
           npx playwright install chromium --with-deps
 
-      - name: Start static server
+      - name: Start StudyFlow server
         run: |
-          python3 -m http.server 8001 &
+          npm start &
           sleep 2
 
       - name: Check app renders
@@ -48,12 +42,12 @@ jobs:
 
             await page.addInitScript(() => {
               const student = {
+                id: 1,
                 name: 'Render Check',
                 email: 'render-check@studyflow.test'
               };
 
               localStorage.setItem('studyflow-active-student', JSON.stringify(student));
-              localStorage.setItem('studyflow-local-accounts', JSON.stringify([student]));
             });
 
             page.on('pageerror', (error) => errors.push(error.message));
@@ -63,7 +57,7 @@ jobs:
               }
             });
 
-            const response = await page.goto('http://127.0.0.1:8001/frontend/pages/index.html', {
+            const response = await page.goto('http://127.0.0.1:8001/pages/index.html', {
               waitUntil: 'networkidle'
             });
 

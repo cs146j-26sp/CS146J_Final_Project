@@ -51,10 +51,10 @@ function setupQuickTaskForm() {
   }
 
   form.dataset.ready = "true";
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const data = new FormData(form);
-    addTask({
+    await addTask({
       title: data.get("title"),
       course: data.get("course"),
       type: "Assignment",
@@ -96,8 +96,8 @@ function renderDashboardTasks() {
     .join("");
 
   container.querySelectorAll("[data-toggle-task]").forEach((button) => {
-    button.addEventListener("click", () => {
-      toggleTask(Number(button.dataset.toggleTask));
+    button.addEventListener("click", async () => {
+      await toggleTask(Number(button.dataset.toggleTask));
       renderDashboardTasks();
       renderTodayFocus();
       renderMetrics();

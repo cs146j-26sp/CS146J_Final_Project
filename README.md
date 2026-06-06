@@ -5,8 +5,8 @@ StudyFlow is a smart study planner for organizing academic tasks, generating stu
 ## Sprint 1 scope
 
 - Multi-page frontend: dashboard, tasks, planner, analytics, and student login.
-- Mock data loaded with `fetch()` from `frontend/data/mock-data.json`.
-- Student-specific task/session persistence with `localStorage` until backend auth is connected.
+- Express + SQLite backend for students, tasks, planner sessions, and analytics.
+- Student login/account creation using name and email only.
 - Task creation, completion toggles, deletion, filtering, and local persistence.
 - Generated weekly study plan plus manual study session creation.
 - Productivity analytics built with plain HTML, CSS, and JavaScript.
@@ -17,27 +17,29 @@ StudyFlow is a smart study planner for organizing academic tasks, generating stu
 From this project folder:
 
 ```bash
-python3 -m http.server 8001
+npm install
+npm start
 ```
 
 Then open:
 
 ```text
-http://127.0.0.1:8001/frontend/
+http://127.0.0.1:8001/
 ```
 
-Use a local server instead of opening the HTML file directly because the app fetches mock JSON.
+Use the Express server instead of opening the HTML file directly because the app now calls the backend API.
 
 ## Project structure
 
+- `backend/` contains the Express API, SQLite schema, and route modules.
 - `frontend/pages/` contains all app HTML pages.
 - `frontend/css/` contains the CSS entrypoint and split style modules.
 - `frontend/js/` contains the JavaScript entrypoint and split behavior modules.
-- `frontend/data/` contains Sprint 1 mock JSON.
+- `backend/studyflow.sqlite` is created locally when the server starts and is ignored by Git.
 
 ## Demo path
 
-1. Start on Login, create a local account with your name and email, then sign in.
+1. Start on Login, create an account with your name and email, then sign in.
 2. Open the dashboard and explain the core vision: one place for deadlines, study planning, and progress.
 3. Add a quick task and show the priority queue and metrics updating.
 4. Open Tasks, filter open/completed tasks, complete a task, and delete a test task.
@@ -46,8 +48,5 @@ Use a local server instead of opening the HTML file directly because the app fet
 
 ## Sprint 2 plan
 
-- Replace mock JSON/localStorage with a custom REST API.
-- Store tasks, study sessions, and focus logs in a database.
-- Add form POST requests to the backend and handle HTTP errors in the UI.
 - Improve scheduler logic using deadlines, estimated hours, and available study windows.
 - Add final deployment instructions and polish based on TA/peer feedback.

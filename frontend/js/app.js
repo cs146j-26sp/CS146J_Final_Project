@@ -15,13 +15,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     return;
   }
 
-  if (requiresLogin() && !getActiveStudent()) {
+  if (requiresLogin() && !getActiveStudent()?.id) {
     clearActiveStudent();
     window.location.href = "../index.html";
     return;
   }
 
-  await loadState();
+  try {
+    await loadState();
+  } catch (error) {
+    console.error(error);
+    clearActiveStudent();
+    window.location.href = "../index.html";
+    return;
+  }
   setupAssistant();
   routePage();
 });
