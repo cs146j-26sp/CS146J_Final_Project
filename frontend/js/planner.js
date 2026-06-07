@@ -1,11 +1,10 @@
-import { dayOrder, saveState, sortedTasks, state } from "./store.js";
-import { escapeHTML, formatTime, nextId } from "./utils.js";
+import { addSession, dayOrder, replaceSessions, sortedTasks, state } from "./store.js";
+import { escapeHTML, formatTime } from "./utils.js";
 
 export function renderPlanner() {
   setupSessionForm();
-  document.querySelector("#regeneratePlan").addEventListener("click", () => {
-    state.sessions = generateSessionsFromTasks();
-    saveState();
+  document.querySelector("#regeneratePlan").addEventListener("click", async () => {
+    await replaceSessions(generateSessionsFromTasks());
     renderWeekPlan();
   });
   renderWeekPlan();
@@ -19,17 +18,15 @@ function setupSessionForm() {
   }
 
   form.dataset.ready = "true";
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const data = new FormData(form);
-    state.sessions.push({
-      id: nextId(state.sessions),
+    await addSession({
       subject: data.get("subject"),
       day: data.get("day"),
       time: data.get("time"),
       duration: Number(data.get("duration"))
     });
-    saveState();
     form.reset();
     renderWeekPlan();
   });

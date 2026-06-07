@@ -1,5 +1,5 @@
-import { addTask, saveState, sortedTasks, state, toggleTask } from "./store.js";
-import { daysUntil, escapeHTML, formatDate, getActiveFilter, priorityTag } from "./utils.js";
+import { addTask, deleteTask, sortedTasks, toggleTask } from "./store.js";
+import { escapeHTML, formatDate, getActiveFilter, priorityTag } from "./utils.js";
 
 export function renderTaskManager(filter = "all") {
   setupTaskForm();
@@ -31,7 +31,7 @@ function setupTaskForm() {
   form.addEventListener("change", updateTaskPreview);
   updateTaskPreview();
 
-  form.addEventListener("submit", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     if (!validateTaskStep(2)) {
@@ -39,7 +39,7 @@ function setupTaskForm() {
     }
 
     const data = new FormData(form);
-    addTask({
+    await addTask({
       title: data.get("title"),
       course: data.get("course"),
       type: data.get("type"),
@@ -214,16 +214,15 @@ function renderTaskTable(filter) {
     .join("");
 
   container.querySelectorAll("[data-toggle-task]").forEach((button) => {
-    button.addEventListener("click", () => {
-      toggleTask(Number(button.dataset.toggleTask));
+    button.addEventListener("click", async () => {
+      await toggleTask(Number(button.dataset.toggleTask));
       renderTaskTable(getActiveFilter());
     });
   });
 
   container.querySelectorAll("[data-delete-task]").forEach((button) => {
-    button.addEventListener("click", () => {
-      state.tasks = state.tasks.filter((task) => task.id !== Number(button.dataset.deleteTask));
-      saveState();
+    button.addEventListener("click", async () => {
+      await deleteTask(Number(button.dataset.deleteTask));
       renderTaskTable(getActiveFilter());
     });
   });
