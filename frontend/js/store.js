@@ -136,6 +136,22 @@ export async function replaceSessions(sessions) {
   return saved;
 }
 
+export async function addFocusMinutes(entry) {
+  const student = getActiveStudent();
+
+  if (!student?.id) {
+    throw new Error("Sign in before tracking focus minutes.");
+  }
+
+  const analytics = await apiRequest(`/users/${student.id}/focus-minutes`, {
+    method: "POST",
+    body: entry
+  });
+
+  state.focusMinutes = analytics.focusMinutes;
+  return analytics.focusMinutes;
+}
+
 export function sortedTasks() {
   return [...state.tasks].sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate));
 }
