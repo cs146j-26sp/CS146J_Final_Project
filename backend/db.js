@@ -5,7 +5,7 @@ import sqlite3 from "sqlite3";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const dbPath = path.join(__dirname, "studyflow.sqlite");
+const dbPath = process.env.DATABASE_PATH || path.join(__dirname, "studyflow.sqlite");
 const schemaPath = path.join(__dirname, "schema.sql");
 
 sqlite3.verbose();
