@@ -1,16 +1,56 @@
-# StudyFlow Sprint 1 Prototype
+<p align="center">
+  <img src="frontend/assets/studyflow_logo.png" alt="StudyFlow logo" width="96" />
+</p>
+
+# StudyFlow
 
 StudyFlow is a smart study planner for organizing academic tasks, generating study sessions, and visualizing productivity.
 
-## Sprint 1 scope
+## Contributors
 
-- Multi-page frontend: dashboard, tasks, planner, analytics, and student login.
-- Express + SQLite backend for students, tasks, planner sessions, and analytics.
-- Student login/account creation using name and email only.
-- Task creation, completion toggles, deletion, filtering, and local persistence.
-- Generated weekly study plan plus manual study session creation.
-- Productivity analytics built with plain HTML, CSS, and JavaScript.
-- Responsive layouts, keyboard navigation support, visible focus states, semantic sections, labels, and ARIA attributes.
+StudyFlow was built by Isaac Okech and Kelvin Waititu.
+
+## Features
+
+- Student account creation and sign-in.
+- Task tracking with priorities and completion status.
+- Weekly study planner with generated sessions.
+- Productivity analytics and workload summaries.
+- Responsive multi-page interface.
+
+## Tech stack
+
+- Frontend: HTML, CSS, JavaScript.
+- Backend: Node.js, Express.
+- Database: SQLite.
+- Deployment: Railway.
+
+## Live app
+
+StudyFlow is deployed on Railway:
+
+```text
+https://cs146jfinalproject-production.up.railway.app/
+```
+
+Open the link in a browser to use the deployed version. The deployed app uses the backend database, so users should create an account once and then sign in with the exact same name and email on later visits.
+
+## Account usage
+
+1. Open the deployed app.
+2. Select **Create account** if this is your first time using StudyFlow.
+3. Enter your name and school email.
+4. After the account is created, use the **Sign in** tab for future visits.
+5. Sign in with the exact same name and email used when the account was created.
+
+If sign-in fails, double-check spelling, capitalization, and the email address. Email addresses are normalized to lowercase, but the name still needs to match the account you created.
+
+## Demo account
+
+Use this account to quickly try the deployed app:
+
+- Name: `titu`
+- Email: `titu@stanford.edu`
 
 ## Run locally
 
@@ -29,6 +69,10 @@ http://127.0.0.1:8001/
 
 Use the Express server instead of opening the HTML file directly because the app now calls the backend API.
 
+## Deployment note
+
+The deployed app uses Railway with a persistent SQLite database path configured through `DATABASE_PATH`.
+
 ## Project structure
 
 - `backend/` contains the Express API, SQLite schema, and route modules.
@@ -39,14 +83,10 @@ Use the Express server instead of opening the HTML file directly because the app
 
 ## Demo path
 
-1. Start on Login, create an account with your name and email, then sign in.
-2. Open the dashboard and explain the core vision: one place for deadlines, study planning, and progress.
-3. Add a quick task and show the priority queue and metrics updating.
-4. Open Tasks, filter open/completed tasks, complete a task, and delete a test task.
-5. Open Planner, regenerate the schedule, and add a manual study session.
-6. Open Analytics and explain the focus chart, completion donut, course workload, and risk insight.
-
-## Sprint 2 plan
-
-- Improve scheduler logic using deadlines, estimated hours, and available study windows.
-- Add final deployment instructions and polish based on TA/peer feedback.
+1. Open the Railway deployment and start on Login.
+2. Create an account with your name and school email, or sign in with an existing StudyFlow account.
+3. Open the dashboard and explain the core vision: one place for deadlines, study planning, and progress.
+4. Add a quick task and show the priority queue and metrics updating.
+5. Open Tasks, filter open/completed tasks, complete a task, and delete a test task.
+6. Open Planner, regenerate the schedule, and add a manual study session.
+7. Open Analytics and explain the focus chart, completion donut, course workload, and risk insight.
