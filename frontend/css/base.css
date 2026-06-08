@@ -212,15 +212,11 @@ button {
 }
 
 .brand-mark {
-  align-items: center;
-  background: linear-gradient(135deg, var(--ink), var(--teal-dark));
   border-radius: 8px;
   box-shadow: 0 10px 22px rgba(0, 127, 125, 0.2);
-  color: white;
-  display: inline-flex;
+  display: block;
   height: 2.35rem;
-  justify-content: center;
-  letter-spacing: 0;
+  object-fit: cover;
   width: 2.35rem;
 }
 
