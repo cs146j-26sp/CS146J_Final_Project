@@ -1,5 +1,10 @@
 import { addTask, deleteTask, sortedTasks, toggleTask } from "./store.js";
-import { escapeHTML, formatDate, getActiveFilter, priorityTag } from "./utils.js";
+import {
+  escapeHTML,
+  formatDate,
+  getActiveFilter,
+  priorityTag,
+} from "./utils.js";
 
 export function renderTaskManager(filter = "all") {
   setupTaskForm();
@@ -46,7 +51,7 @@ function setupTaskForm() {
       dueDate: data.get("dueDate"),
       priority: data.get("priority"),
       hours: Number(data.get("hours")),
-      status: "open"
+      status: "open",
     });
     form.reset();
     form.elements.hours.value = 2;
@@ -125,7 +130,8 @@ function updateTaskPreview() {
   const hours = Number(form.elements.hours.value) || 0;
   const dueDate = form.elements.dueDate.value;
   const daysLeft = dueDate ? daysUntil(dueDate) : null;
-  const dailyLoad = daysLeft !== null && daysLeft >= 0 ? hours / Math.max(daysLeft, 1) : 0;
+  const dailyLoad =
+    daysLeft !== null && daysLeft >= 0 ? hours / Math.max(daysLeft, 1) : 0;
   const risk = getTaskRisk(priority, dailyLoad, daysLeft);
 
   preview.innerHTML = `
@@ -141,18 +147,34 @@ function updateTaskPreview() {
 
 function getTaskRisk(priority, dailyLoad, daysLeft) {
   if (daysLeft !== null && daysLeft < 0) {
-    return { label: "Blocked", message: "move the due date forward", width: 100 };
+    return {
+      label: "Overdue",
+      message: "move the due date forward",
+      width: 100,
+    };
   }
 
   if (priority === "High" || dailyLoad > 2.5) {
-    return { label: "High signal", message: "schedule this before lighter work", width: 92 };
+    return {
+      label: "High urgency",
+      message: "schedule this before lighter work",
+      width: 92,
+    };
   }
 
   if (dailyLoad > 1 || priority === "Medium") {
-    return { label: "Medium signal", message: "one focused block should keep it controlled", width: 58 };
+    return {
+      label: "Moderate urgency",
+      message: "one focused block should keep it controlled",
+      width: 58,
+    };
   }
 
-  return { label: "Low signal", message: "safe to batch with smaller tasks", width: 28 };
+  return {
+    label: "Low urgency",
+    message: "safe to batch with smaller tasks",
+    width: 28,
+  };
 }
 
 function daysUntil(value) {
@@ -170,7 +192,9 @@ function setupTaskFilters() {
 
     button.dataset.ready = "true";
     button.addEventListener("click", () => {
-      document.querySelectorAll("[data-filter]").forEach((item) => item.classList.remove("active"));
+      document
+        .querySelectorAll("[data-filter]")
+        .forEach((item) => item.classList.remove("active"));
       button.classList.add("active");
       renderTaskTable(button.dataset.filter);
     });
@@ -195,13 +219,24 @@ function renderTaskTable(filter) {
   }
 
   container.innerHTML = tasks
-    .map(
-      (task) => `
+    .map((task) => {
+      const progress = getTaskProgress(task);
+
+      return `
         <article class="table-row">
-          <div>
+          <div class="task-summary">
             <h3>${escapeHTML(task.title)}</h3>
             <p class="meta">${escapeHTML(task.course)} · ${escapeHTML(task.type)} · due ${formatDate(task.dueDate)}</p>
             <div class="tag-row">${priorityTag(task.priority)} <span class="tag">${task.hours}h estimate</span></div>
+            <div class="task-progress ${progress.level}" aria-label="${progress.label}">
+              <div class="task-progress-header">
+                <span>${progress.label}</span>
+                <strong>${progress.width}%</strong>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" style="width: ${progress.width}%"></div>
+              </div>
+            </div>
           </div>
           <p class="meta">${task.status === "completed" ? "Completed" : "Open"}</p>
           <button class="small-action" type="button" data-toggle-task="${task.id}">
@@ -209,8 +244,8 @@ function renderTaskTable(filter) {
           </button>
           <button class="small-action" type="button" data-delete-task="${task.id}">Delete</button>
         </article>
-      `
-    )
+      `;
+    })
     .join("");
 
   container.querySelectorAll("[data-toggle-task]").forEach((button) => {
@@ -226,4 +261,21 @@ function renderTaskTable(filter) {
       renderTaskTable(getActiveFilter());
     });
   });
+}
+
+function getTaskProgress(task) {
+  if (task.status === "completed") {
+    return { label: "Finished", level: "complete", width: 100 };
+  }
+
+  const daysLeft = daysUntil(task.dueDate);
+  const dailyLoad = Number(task.hours) / Math.max(daysLeft, 1);
+  const risk = getTaskRisk(task.priority, dailyLoad, daysLeft);
+  const level = risk.width >= 80 ? "high" : risk.width >= 50 ? "medium" : "low";
+
+  return {
+    label: `${risk.label}`,
+    level,
+    width: risk.width,
+  };
 }

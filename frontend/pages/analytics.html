@@ -61,14 +61,31 @@
       </section>
 
       <section class="analytics-grid" aria-label="Analytics dashboard">
-        <section class="panel span-two" aria-labelledby="focus-chart-title">
+        <section class="panel span-two analytics-panel focus-panel" aria-labelledby="focus-chart-title">
           <div class="section-heading">
             <p class="eyebrow">Focus</p>
             <h2 id="focus-chart-title">Minutes shipped</h2>
           </div>
+          <div class="focus-timer" aria-label="Focus timer">
+            <div>
+              <p class="eyebrow">Timer</p>
+              <strong id="focusTimerDisplay">00:00</strong>
+              <span id="focusTimerStatus">Ready to track</span>
+            </div>
+            <div class="focus-timer-actions">
+              <button class="small-action" id="focusTimerStart" type="button">Start</button>
+              <button class="small-action" id="focusTimerReset" type="button">Reset</button>
+              <button class="small-action" id="focusTimerSave" type="button">Save</button>
+            </div>
+          </div>
+          <div class="focus-key" aria-label="Focus minutes color key">
+            <span><i class="focus-swatch low"></i>Needs focus: under 60 min</span>
+            <span><i class="focus-swatch medium"></i>Building: 60-119 min</span>
+            <span><i class="focus-swatch high"></i>Strong: 120+ min</span>
+          </div>
           <div class="bar-chart" id="focusChart" role="img" aria-label="Bar chart of focus minutes by day"></div>
         </section>
-        <section class="panel" aria-labelledby="completion-title">
+        <section class="panel analytics-panel completion-panel" aria-labelledby="completion-title">
           <div class="section-heading compact">
             <p class="eyebrow">Done</p>
             <h2 id="completion-title">Close rate</h2>
@@ -76,14 +93,14 @@
           <div class="donut" id="completionDonut" aria-label="Task completion percentage"></div>
           <p class="chart-caption" id="completionCaption"></p>
         </section>
-        <section class="panel" aria-labelledby="course-title">
+        <section class="panel analytics-panel load-panel" aria-labelledby="course-title">
           <div class="section-heading compact">
             <p class="eyebrow">Load</p>
             <h2 id="course-title">By class</h2>
           </div>
           <div class="course-breakdown" id="courseBreakdown"></div>
         </section>
-        <section class="panel span-two" aria-labelledby="wins-title">
+        <section class="panel span-two analytics-panel signal-panel" aria-labelledby="wins-title">
           <div class="section-heading">
             <p class="eyebrow">Signal</p>
             <h2 id="wins-title">Wins / risks</h2>
